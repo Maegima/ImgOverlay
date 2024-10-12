@@ -36,12 +36,21 @@ namespace ImgOverlay
             e.Handled = true;
         }
 
-        private void LoadButton_Click(object sender, RoutedEventArgs e)
+        private void LoadFileButton_Click(object sender, RoutedEventArgs e)
         {
             var openDialog = new OpenFileDialog();
             if (openDialog.ShowDialog() == true)
             {
+                LoadedFile.Text = openDialog.FileName;
                 (Owner as MainWindow)?.LoadImage(openDialog.FileName);
+            }
+        }
+
+        private void LoadFolderButton_Click(object sender, RoutedEventArgs e) {
+            var openDialog = new OpenFolderDialog();
+            if (openDialog.ShowDialog() == true) {
+                LoadedFile.Text = openDialog.FolderName;
+                (Owner as MainWindow)?.LoadFolder(openDialog.FolderName);
             }
         }
 

@@ -5,8 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImgOverlay"
         mc:Ignorable="d"
-        Title="Image Overlay" Height="150
-        " Width="351"
+        Title="Image Overlay" Height="170" Width="351"
         ResizeMode="CanMinimize" 
         DragOver="ControlPanel_DragOver" 
         AllowDrop="True" 
@@ -14,6 +13,7 @@
     <Grid Margin="0,0,0,5">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
+            <RowDefinition Height="25"/>
             <RowDefinition />
             <RowDefinition />
             <RowDefinition Height="25"/>
@@ -22,18 +22,30 @@
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
-                <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <Button x:Name="LoadButton" Grid.Column="0" Click="LoadButton_Click">
-                <TextBlock Text="Load..." />
-            </Button>
-            <ToggleButton x:Name="DragButton" Grid.Column="1" Click="DragButton_Click">
+            <ToggleButton x:Name="DragButton" Click="DragButton_Click" Margin="1,1,1,1">
                 <TextBlock Text="Move Image" />
             </ToggleButton>
         </Grid>
 
         <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="25" />
+                <ColumnDefinition Width="25" />
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="LoadFolderButton" Grid.Column="1" Click="LoadFolderButton_Click" Margin="1,1,1,1">
+                <Image Source="/image-folder.png" Stretch="Uniform"/>
+            </Button>
+            <Button x:Name="LoadFileButton" Grid.Column="2" Click="LoadFileButton_Click" Margin="1,1,1,1">
+                <Image Source="/image-file.png" Stretch="Uniform"/>
+            </Button>
+            <TextBox x:Name="LoadedFile" Text="..." Margin="1,1,1,1" InputScope="FullFilePath" MaxLines="1"/>
+        </Grid>
+
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="50" />
@@ -42,7 +54,7 @@
             <Label x:Name="OpacityValue" Grid.Column="1" Content="1.0" VerticalAlignment="Center" Grid.Row="1" HorizontalAlignment="Center"/>
         </Grid>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="50" />
@@ -50,7 +62,7 @@
             <Slider x:Name="RotateSlider" Minimum="-180" Maximum="180" Value="0" ValueChanged="RotateSlider_ValueChanged" VerticalAlignment="Center" TickFrequency="0.1" IsSnapToTickEnabled="True" />
             <Label x:Name="RotateValue" Grid.Column="1" Content="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </Grid>
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />

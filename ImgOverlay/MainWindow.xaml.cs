@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,8 @@ namespace ImgOverlay
     public partial class MainWindow : Window
     {
         ControlPanel cp = new ControlPanel();
+        List<String> images;
+        int currentIndex = -1;
 
         public MainWindow()
         {
@@ -30,34 +33,52 @@ namespace ImgOverlay
             InitializeComponent();
         }
 
-        public void LoadImage(string path)
-        {
-            if (System.IO.Directory.Exists(path))
-            {
+        public void LoadImage(string path) {
+            currentIndex = -1;
+            if (System.IO.Directory.Exists(path)) {
                 MessageBox.Show("Cannot open folders.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            if (!System.IO.File.Exists(path))
-            {
+            if (!System.IO.File.Exists(path)) {
                 MessageBox.Show("The selected image file does not exist.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-
-            var img = new BitmapImage();
-            try
-            {
-                img.BeginInit();
-                    img.UriSource = new Uri(path);
-                img.EndInit();
-            }
-            catch (Exception e)
-            {
+            if(!TryLoadImage(path)) {
                 MessageBox.Show("Error loading image. Perhaps its format is unsupported?", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+            }
+        }
+        private bool TryLoadImage(string filepath) {
+            var img = new BitmapImage();
+            try {
+                img.BeginInit();
+                img.UriSource = new Uri(filepath);
+                img.EndInit();
+            } catch (Exception e) {
+                return false;
             }
 
             DisplayImage.Source = img;
+            return true;
+        }
+
+        public void LoadFolder(string path) {
+            if (!System.IO.Directory.Exists(path)) {
+                MessageBox.Show("The selected image folder does not exist.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            images = Directory.EnumerateFiles(path).ToList();
+            images = images.FindAll(file => 
+                file.EndsWith(".png") | 
+                file.EndsWith(".jpg") | 
+                file.EndsWith(".jpeg") |
+                file.EndsWith(".gif") |
+                file.EndsWith(".tiff"));
+            if(images.Count == 0 || !TryLoadImage(images.First())) {
+                MessageBox.Show("The selected folder does not contains a valid image.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            currentIndex = 0;
         }
 
         public void ChangeOpacity(float opacity)
@@ -118,6 +139,15 @@ namespace ImgOverlay
             {
                 cp.WidthValue.Content = e.NewSize.Width;
                 cp.HeightValue.Content = e.NewSize.Height;
+            }
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e) {
+            if (currentIndex < 0 && images.Count > 0) return;
+            if (e.Key == Key.Left || e.Key == Key.Right) {
+                do {
+                    currentIndex = ((e.Key == Key.Left ? --currentIndex : ++currentIndex) + images.Count) % images.Count;
+                } while (!TryLoadImage(images[currentIndex]));
             }
         }
     }
