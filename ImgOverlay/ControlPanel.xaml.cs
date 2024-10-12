@@ -48,12 +48,16 @@ namespace ImgOverlay
         private void OpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             (Owner as MainWindow)?.ChangeOpacity((float)e.NewValue);
+            if(OpacityValue != null)
+                OpacityValue.Content = e.NewValue.ToString();
         }
 
         private void RotateSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             (Owner as MainWindow)?.ChangeRotation((float)e.NewValue);
-        }
+            if(RotateValue != null)
+                RotateValue.Content = e.NewValue.ToString();
+            }
 
         private void ControlPanel_DragOver(object sender, DragEventArgs e)
         {

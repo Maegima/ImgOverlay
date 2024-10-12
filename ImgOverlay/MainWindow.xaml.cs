@@ -86,7 +86,14 @@ namespace ImgOverlay
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
+            {
                 this.DragMove();
+                if(cp.LeftValue != null && cp.TopValue != null)
+                {
+                    cp.LeftValue.Content = this.Left;
+                    cp.TopValue.Content = this.Top;
+                }
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -103,6 +110,15 @@ namespace ImgOverlay
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             WindowsServices.SetWindowExTransparent(hwnd);
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (cp.HeightValue != null && cp.WidthValue != null)
+            {
+                cp.WidthValue.Content = e.NewSize.Width;
+                cp.HeightValue.Content = e.NewSize.Height;
+            }
         }
     }
 }
