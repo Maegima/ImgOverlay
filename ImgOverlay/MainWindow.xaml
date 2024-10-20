@@ -15,10 +15,15 @@
         SourceInitialized="Window_SourceInitialized"
         MouseDown="Window_MouseDown" SizeChanged="Window_SizeChanged" KeyDown="Window_KeyDown">
     <Window.Background>
-        <SolidColorBrush Opacity="0" Color="White" />
+        <SolidColorBrush Opacity="0.0" Color="White" />
     </Window.Background>
     <Grid >
-        <Image x:Name="DisplayImage"></Image>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Image Grid.Column="0" x:Name="DisplayImage"></Image>
         <ResizeGrip />
-    </Grid>
+        <Grid Grid.Column="1" x:Name="DisplayNext" Width="100" HorizontalAlignment="Right">
+        </Grid>
+    </Grid >
 </Window>

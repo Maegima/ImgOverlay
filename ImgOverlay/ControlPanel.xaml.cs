@@ -17,10 +17,10 @@ namespace ImgOverlay
 
         private void DragButton_Click(object sender, RoutedEventArgs e)
         {
-            if (Owner == null)
+            ToggleButton? toggleButton = sender as ToggleButton;
+            if (Owner == null || toggleButton == null)
                 return;
-
-            var opaque = (sender as ToggleButton).IsChecked.Value;
+            bool opaque = toggleButton.IsChecked != null && toggleButton.IsChecked.Value;
             Owner.IsHitTestVisible = opaque;
 
             var hwnd = new WindowInteropHelper(Owner).Handle;
