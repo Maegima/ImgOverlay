@@ -59,7 +59,7 @@ namespace ImgOverlay {
         public void Display() {
             double height = 0;
             foreach(var image in images) {
-                height += AddPreview(image);   
+                height += AddPreview(image, 2 * parent.ActualHeight > height);   
             }
             current.Source = images.First().Source;
             currentIndex = 1;
@@ -69,7 +69,8 @@ namespace ImgOverlay {
             scrool.ViewportSize = scrool.Maximum / 15;
         }
 
-        public double AddPreview(ImageLoader imageLoader) {
+        public double AddPreview(ImageLoader imageLoader, bool load) {
+            if (load) imageLoader.Load();
             var image = new Image {
                 Source = imageLoader.Source,
                 Margin = new Thickness(ImageMargin),

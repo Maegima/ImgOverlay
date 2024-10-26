@@ -135,7 +135,7 @@ namespace ImgOverlay
 
         private void ScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
             var sc = (ScrollBar)sender;
-            double percent = ScrollPreview.Value / ScrollPreview.Maximum  + 0.1;
+            double percent = (ScrollPreview.Value + this.Height) / ScrollPreview.Maximum;
             int until = percent > 1 ? DisplayNext.Children.Count : (int)(DisplayNext.Children.Count * percent);
             for (int i = 0; i < until; i++) {
                 var image = (Image)DisplayNext.Children[i];
