@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -18,7 +20,7 @@ namespace ImgOverlay
         {
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
             InitializeComponent();
-            ImageDisplay = new ImageDisplay(DisplayImage, DisplayNext);
+            ImageDisplay = new ImageDisplay(this, DisplayImage, DisplayNext, ScrollPreview);
         }
 
         public void LoadImage(string path) {
@@ -46,18 +48,10 @@ namespace ImgOverlay
                 return;
             }
 
-            var images = Directory.EnumerateFiles(path).ToList();
-            images = images.FindAll(file => 
-                file.EndsWith(".png") | 
-                file.EndsWith(".jpg") | 
-                file.EndsWith(".jpeg") |
-                file.EndsWith(".gif") |
-                file.EndsWith(".tiff"));
-            
-            if (images.Count == 0 || !ImageDisplay.Load(images)) {
+            if (!ImageDisplay.Load(path)) {
                 MessageBox.Show("The selected folder does not contains a valid image.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            ImageDisplay.Display(this.ActualHeight);
+            ImageDisplay.Display();
         }
 
         public void ChangeOpacity(float opacity)
@@ -122,10 +116,49 @@ namespace ImgOverlay
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e) {
-            if (e.Key == Key.Left) {
-                ImageDisplay.Previous();
-            } else if (e.Key == Key.Right) {
-                ImageDisplay.Next();
+            switch(e.Key) {
+                case Key.Left:
+                    ImageDisplay.Previous(); break;
+                case Key.Right:
+                    ImageDisplay.Next(); break;
+                case Key.Up:
+                    ImageDisplay.PreviousFolder(); break;
+                case Key.Down:
+                    ImageDisplay.NextFolder(); break;
+                case Key.M:
+                    cp.DragButton.IsChecked = false;
+                    cp.DragImageWindow(false);
+                    cp.Activate();
+                    break;
+            }
+        }
+
+        private void ScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            var sc = (ScrollBar)sender;
+            double percent = ScrollPreview.Value / ScrollPreview.Maximum  + 0.1;
+            int until = percent > 1 ? DisplayNext.Children.Count : (int)(DisplayNext.Children.Count * percent);
+            for (int i = 0; i < until; i++) {
+                var image = (Image)DisplayNext.Children[i];
+                var loader = (ImageLoader)image.Tag;
+                if (!loader.IsLoaded) {
+                    loader.Load();
+                    image.Source = loader.Source;
+                }
+            }
+            double height = 0;
+            foreach(var child in DisplayNext.Children) {
+                var image = (Image)child;
+                height += image.ActualHeight;
+            }
+            sc.Maximum = height - this.Height  + 250;
+            DisplayNext.Margin = new Thickness(0, -sc.Value, 0, 0);
+        }
+
+        private void DisplayNext_MouseWheel(object sender, MouseWheelEventArgs e) {
+            if (e.Delta != 0) {
+                ScrollPreview.Value -= e.Delta;
+                if (ScrollPreview.Value < 0) ScrollPreview.Value = 0;
+                if (ScrollPreview.Value > ScrollPreview.Maximum) ScrollPreview.Value = ScrollPreview.Maximum;
             }
         }
     }

@@ -1,24 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace ImgOverlay {
-    internal class ImageDisplay(Image image, Grid grid) {
+    internal class ImageDisplay(Window window, Image image, Grid grid, ScrollBar scrollBar) {
         private readonly List<ImageLoader> images = [];
+        private readonly Window parent = window;
         private readonly Image current = image;
         private readonly Grid preview = grid;
+        private readonly ScrollBar scrool = scrollBar;
         private int currentIndex = -1;
         private readonly int ImageMargin = 4;
+        private List<string> folders = [];
+        private int currentFolderIndex = -1;
 
-        public bool Load(List<string> paths) {
+        public bool Load(string path) {
+            var parent = Path.GetDirectoryName(path) ?? path;
+            folders = Directory.GetDirectories(parent).ToList();
+            currentFolderIndex = folders.IndexOf(path);
+            
+            return LoadImages(path);
+        }
+
+        public bool LoadImages(string path) {
             Clear();
-            foreach (string path in paths) {
-                images.Add(new ImageLoader(path));
+            var files = Directory.EnumerateFiles(path).ToList().FindAll(file =>
+                file.EndsWith(".png") |
+                file.EndsWith(".jpg") |
+                file.EndsWith(".jpeg") |
+                file.EndsWith(".gif") |
+                file.EndsWith(".tiff"));
+
+            if (files.Count == 0) return false;
+
+            int index = 0;
+            foreach (string file in files) {
+                images.Add(new ImageLoader(file, index++));
             }
             return images.First().Load();
         }
@@ -30,29 +56,37 @@ namespace ImgOverlay {
             currentIndex = -1;
         }
 
-        public void Display(double maxheight) {
+        public void Display() {
             double height = 0;
-            int index = 0;
-            while(height < maxheight && index < images.Count) {
-                height += AddPreview(images[index++]);
+            foreach(var image in images) {
+                height += AddPreview(image);   
             }
             current.Source = images.First().Source;
             currentIndex = 1;
+
+            scrool.Value = 0;
+            scrool.Maximum = height - parent.ActualHeight;
+            scrool.ViewportSize = scrool.Maximum / 15;
         }
 
         public double AddPreview(ImageLoader imageLoader) {
-            if (!imageLoader.Load()) return 0;
             var image = new Image {
                 Source = imageLoader.Source,
-                Margin = new Thickness(ImageMargin)
+                Margin = new Thickness(ImageMargin),
+                Tag = imageLoader
             };
             image.MouseEnter += (o, ev) => { ((Image)o).Opacity = 0.5; };
             image.MouseLeave += (o, ev) => { ((Image)o).Opacity = 1.0; };
-            image.MouseDown += (o, ev) => { current.Source = ((Image)o).Source; };
+            image.MouseDown += (o, ev) => { SetCurrent((ImageLoader)((Image)o).Tag); };
             Grid.SetRow(image, preview.Children.Count);
             preview.RowDefinitions.Add(new RowDefinition { Height = new GridLength(0, GridUnitType.Auto) });
             preview.Children.Add(image);
             return preview.Width * image.Source.Height / image.Source.Width + 2 * ImageMargin;
+        }
+
+        private void SetCurrent(ImageLoader imageLoader) {
+            current.Source = imageLoader.Source;
+            currentIndex = imageLoader.Index;
         }
 
         public void Next() {
@@ -69,6 +103,22 @@ namespace ImgOverlay {
                 currentIndex = (--currentIndex + images.Count) % images.Count;
             } while (!images[currentIndex].Load());
             current.Source = images[currentIndex].Source;
+        }
+
+        public void NextFolder() {
+            if(currentFolderIndex == -1) return;
+            do {
+                currentFolderIndex = ++currentFolderIndex % folders.Count;
+            } while (!LoadImages(folders[currentFolderIndex]));
+            Display();
+        }
+
+        public void PreviousFolder() {
+            if (currentFolderIndex == -1) return;
+            do {
+                currentFolderIndex = (--currentFolderIndex + folders.Count) % folders.Count;
+            } while (!LoadImages(folders[currentFolderIndex]));
+            Display();
         }
     }
 }
