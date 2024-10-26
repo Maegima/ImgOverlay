@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImgOverlay"
+        xmlns:ImgOverlay="clr-namespace:ImgOverlay.Templates"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525"
         Topmost="True"
@@ -17,13 +18,16 @@
     <Window.Background>
         <SolidColorBrush Opacity="0.0" Color="White" />
     </Window.Background>
+    <Window.Resources>
+        <ResourceDictionary Source="/Themes/ScrollBar.xaml"/>
+    </Window.Resources>
     <Grid >
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-        <Image Grid.Column="0" x:Name="DisplayImage"></Image>
-        <ResizeGrip />
-        <Grid Grid.Column="1" x:Name="DisplayNext" Width="100" HorizontalAlignment="Right">
+        <Image x:Name="DisplayImage"></Image>
+        <Grid Width="100" MouseWheel="DisplayNext_MouseWheel" Background="#01000000" HorizontalAlignment="Right">
+            <Grid Width="100" HorizontalAlignment="Right" x:Name="DisplayNext"/>
+            <ImgOverlay:CustomScrollBar x:Name="ScrollPreview" ValueChanged="ScrollBar_ValueChanged" SmallChange="1" HorizontalAlignment="Right"/>
         </Grid>
     </Grid >
 </Window>
+
+    
