@@ -15,24 +15,21 @@ namespace ImgOverlay
             InitializeComponent();
         }
 
-        private void DragButton_Click(object sender, RoutedEventArgs e)
-        {
-            ToggleButton? toggleButton = sender as ToggleButton;
-            if (Owner == null || toggleButton == null)
-                return;
-            bool opaque = toggleButton.IsChecked != null && toggleButton.IsChecked.Value;
+         public void DragImageWindow(bool opaque) {
             Owner.IsHitTestVisible = opaque;
-
             var hwnd = new WindowInteropHelper(Owner).Handle;
-            if (opaque)
-            {
+            if (opaque) {
                 WindowsServices.SetWindowExOpaque(hwnd);
-            }
-            else
-            {
+            } else {
                 WindowsServices.SetWindowExTransparent(hwnd);
             }
+        }
 
+        private void DragButton_Click(object sender, RoutedEventArgs e) {
+            var toggleButton = (ToggleButton)sender;
+            if (Owner == null || toggleButton == null)
+                return;
+            DragImageWindow(toggleButton.IsChecked != null && toggleButton.IsChecked.Value);
             e.Handled = true;
         }
 
@@ -95,6 +92,13 @@ namespace ImgOverlay
             if (s.Length == 1)
             {
                 (Owner as MainWindow)?.LoadImage(s[0]);
+            }
+        }
+
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e) {
+            if(e.Key == System.Windows.Input.Key.M) {
+                DragButton.IsChecked = !DragButton.IsChecked;
+                DragImageWindow(DragButton.IsChecked != null && DragButton.IsChecked.Value);
             }
         }
     }
